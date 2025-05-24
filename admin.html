@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Produk</title>
+</head>
+<body>
+  <h2>Manajemen Produk</h2>
+
+  <form id="formProduk">
+    <input type="hidden" id="index" value="">
+    <input type="text" id="nama" placeholder="Nama Produk" required><br>
+    <input type="number" id="harga" placeholder="Harga" required><br>
+    <input type="file" id="gambar" accept="image/*"><br>
+    <button type="submit">Simpan Produk</button>
+  </form>
+
+  <h3>Daftar Produk</h3>
+  <ul id="daftarProduk"></ul>
+
+  <script>
+    let produk = JSON.parse(localStorage.getItem("produkList")) || [];
+
+    function simpanKeLocalStorage() {
+      localStorage.setItem("produkList", JSON.stringify(produk));
+      tampilkanProduk();
+    }
+
+    function tampilkanProduk() {
+      const daftar = document.getElementById('daftarProduk');
+      daftar.innerHTML = '';
+      produk.forEach((item, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <img src="${item.gambar}" width="100"><br>
+          ${item.nama} - Rp${item.harga} 
+          <button onclick="editProduk(${i})">Edit</button> 
+          <button onclick="hapusProduk(${i})">Hapus</button>`;
+        daftar.appendChild(li);
+      });
+    }
+
+    function editProduk(i) {
+      document.getElementById('index').value = i;
+      document.getElementById('nama').value = produk[i].nama;
+      document.getElementById('harga').value = produk[i].harga;
+    }
+
+    function hapusProduk(i) {
+      produk.splice(i, 1);
+      simpanKeLocalStorage();
+    }
+
+    document.getElementById('formProduk').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const index = document.getElementById('index').value;
+      const nama = document.getElementById('nama').value;
+      const harga = document.getElementById('harga').value;
+      const file = document.getElementById('gambar').files[0];
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function () {
+          simpanProduk(nama, harga, reader.result, index);
+        };
+        reader.readAsDataURL(file); // Konversi ke Base64
+      } else {
+        const gambarLama = index ? produk[index].gambar : '';
+        simpanProduk(nama, harga, gambarLama, index);
+      }
+    });
+
+    function simpanProduk(nama, harga, gambar, index) {
+      const data = { nama, harga, gambar };
+      if (index === '') {
+        produk.push(data);
+      } else {
+        produk[index] = data;
+        document.getElementById('index').value = '';
+      }
+      document.getElementById('formProduk').reset();
+      simpanKeLocalStorage();
+    }
+
+    tampilkanProduk();
+  </script>
+</body>
+</html>

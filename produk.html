@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toko Mainan Koleksi</title>
+  <style>
+    * {
+      margin: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: sans-serif;
+      background-color: #FAF0E6;
+    }
+    nav {
+      background-color: #352F44;
+      color: #FAF0E6;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo h1 {
+      margin: 0;
+      letter-spacing: 25px;
+      cursor: pointer;
+    }
+    .logo h6 {
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+    ul#asfd {
+      display: flex;
+      gap: 30px;
+      list-style: none;
+      margin-right: 30px;
+    }
+    ul#asfd li a {
+      color: #FAF0E6;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .cart-icon img {
+      cursor: pointer;
+      width: 30px;
+      filter: invert(1);
+    }
+    #popupKeranjang {
+      display: none;
+      position: absolute;
+      top: 70px;
+      right: 20px;
+      background-color: white;
+      color: black;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      width: 300px;
+      z-index: 999;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    #popupKeranjang h3 {
+      margin-top: 0;
+    }
+    #popupKeranjang ul {
+      list-style: none;
+      padding: 0;
+    }
+    #popupKeranjang li {
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 5px;
+    }
+    #popupKeranjang .close {
+      float: right;
+      cursor: pointer;
+      font-size: 18px;
+      color: red;
+    }
+    #listProduk {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 50px;
+      padding: 30px;
+    }
+  </style>
+</head>
+<body onload="panggil(); ker();">
+  <nav>
+    <div class="logo">
+      <h1 onclick="mainkanAudio()" style="cursor: url('asset/New Project (1).ico'), auto;">TMK</h1>
+      <h6>Toko Mainan Koleksi</h6>
+      <audio id="audiosaya" src="asset/hidup-jokowi.mp3"></audio>
+      <audio id="hiduplonte" src="asset/hidup-lonte.mp3"></audio>
+    </div>
+
+    <ul id="asfd">
+      <li><a href="#">Home</a></li>
+      <li><a href="#" onclick="audioke2()">Contact</a></li>
+      <li><a href="#aboutme">About Me</a></li>
+      <li class="cart-icon" onclick="toggleKeranjang()">
+        <img src="https://cdn-icons-png.flaticon.com/128/13822/13822976.png" alt="Cart">
+        <span id="keranjangnumber"></span>
+      </li>
+    </ul>
+
+    <span id="namaakun"></span>
+    <div id="popupKeranjang">
+      <span class="close" onclick="toggleKeranjang()">&times;</span>
+      <h3>Isi Keranjang</h3>
+      <ul id="isiKeranjang"></ul>
+      <p>_____________________________</p>
+      <span id="total" style="display: block; margin-top: 10px; font-weight: bold;"></span>
+      <button type="submit" id="checkout" onclick="alert('Comming Soon!')">checkout</button>
+</script>
+
+    </div>
+  </nav>
+
+  <div id="listProduk"></div>
+
+  <script>
+    function mainkanAudio() {
+      document.getElementById("audiosaya").play();
+    }
+    function audioke2() {
+      alert("Coming Soon!..");
+      document.getElementById("hiduplonte").play();
+    }
+
+    function panggil() {
+      const a = document.getElementById("namaakun");
+      const usern = localStorage.getItem('user'); 
+      if (usern) {
+        const user = JSON.parse(usern);
+        a.textContent = user.username;
+      } else {
+        a.textContent = "User tidak ditemukan";
+      }
+    }
+
+    function ker() {
+      const keran = JSON.parse(localStorage.getItem('keranjang')) || [];
+      console.log("Jumlah item di keranjang:", keran.length);
+      document.getElementById("keranjangnumber").textContent = keran.length > 0 ? `(${keran.length})` : "";
+    }
+
+    function hapusDariKeranjang(index) {
+      keranjang.splice(index, 1); // Hapus item dari array
+      localStorage.setItem("keranjang", JSON.stringify(keranjang)); // Simpan kembali ke localStorage
+      toggleKeranjang(); // Tutup popup
+      toggleKeranjang(); // Buka kembali untuk refresh tampilan
+      tampilkanTotal();
+    }
+
+
+    function toggleKeranjang() {
+      const popup = document.getElementById('popupKeranjang');
+      const list = document.getElementById('isiKeranjang');
+      const keranjang = JSON.parse(localStorage.getItem("keranjang")) || [];
+
+      if (popup.style.display === 'block') {
+        popup.style.display = 'none';
+        return;
+      }
+
+      list.innerHTML = '';
+      if (keranjang.length === 0) {
+        list.innerHTML = '<li>Keranjang kosong</li>';
+      } else {
+          keranjang.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+              <strong>${item.nama}</strong><br>
+              Harga: Rp${item.harga}<br>
+              <button onclick="hapusDariKeranjang(${index})">Hapus</button>
+            `;
+            list.appendChild(li);
+          });
+        }
+
+
+      popup.style.display = 'block';
+    }
+
+    const produk = JSON.parse(localStorage.getItem("produkList")) || [];
+    const container = document.getElementById('listProduk');
+    let keranjang = JSON.parse(localStorage.getItem("keranjang")) || [];
+
+    function tambahKeKeranjang(index) {
+      const item = produk[index];
+      keranjang.push(item);
+      localStorage.setItem("keranjang", JSON.stringify(keranjang));
+      ker();
+      alert(`\"${item.nama}\" berhasil dimasukkan ke keranjang!`);
+    }
+
+    produk.forEach((p, i) => {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <img src="${p.gambar}" width="150" height="200"><br>
+        <strong>${p.nama}</strong><br>
+        Harga: Rp${p.harga}<br>
+        <button onclick='tambahKeKeranjang(${i})'>Masukkan ke Keranjang</button>
+        <hr>`;
+      container.appendChild(div);
+    });
+
+    function hitungTotalHarga() {
+    return keranjang.reduce((total, item) => total + parseInt(item.harga), 0);
+    }
+
+  function tampilkanTotal() {
+    const totalElem = document.getElementById('total');
+    const total = hitungTotalHarga();
+
+    if (keranjang.length > 0) {
+      totalElem.textContent = `Total: Rp${total}`;
+      totalElem.style.display = 'block';
+    } else {
+      totalElem.textContent = '';
+      totalElem.style.display = 'none';
+    }
+}
+tampilkanTotal()
+
+  </script>
+</body>
+</html>
